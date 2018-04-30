@@ -1,0 +1,9 @@
+<div class="user-list-wrapper">
+  <h1>List of users</h1>
+  <mat-list>
+      <mat-list-item *ngFor="let user of users">
+        <button mat-button>{{user.name}}</button>
+      </mat-list-item>
+  </mat-list>
+  <input placeholder="Name">
+</div>
