@@ -1,3 +1,15 @@
-<p>
-  user-profile works!
-</p>
+<div class="user-profile-wrapper">
+    <table class="user-data">
+      <tr>
+        <th *ngFor="let colName of displayedColumns">{{ colName }}</th>
+      </tr>
+      <tr *ngIf="user">
+        <td *ngFor="let colName of displayedColumns">{{ user[colName.toLowerCase()] }}</td>
+      </tr>
+    </table>
+    <div class="user-actions-wrapper">
+      <button class="action-button" (click)="goToEditProfile()">UPDATE</button>
+      <button class="action-button"[routerLink]="['/users']"
+        (click)="removeUser()">Delete user</button>
+    </div>
+</div>

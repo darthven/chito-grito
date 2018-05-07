@@ -1,5 +1,6 @@
 export default interface User {
-    name: string,
-    age: number,
-    info: string
+    _id?: string;
+    name: string;
+    age?: number;
+    info?: string;
 }

@@ -18,50 +18,32 @@ const database = new MongoDatabase(CONNECTION_URL, DATABASE_NAME);
 
 const server = new ChitoGritoServer('localhost', 3000, '../client/', database);
 
-const stubUsers = [
-  {
-    name: "Adolf Dassler",
-    age: 115,
-    info: "Test"
-  },
-  {
-    name: "Rudolf Dassler",
-    age: 113,
-    info: "Test2"
-  },
-  {
-    name: "Anubis",
-    age: 5000,
-    info: "Test3"
-  }
-];
-
-const initStubUsers = (users: any[]): void => {
-  users.forEach((user) =>
-    database.insertDocument(user, database.getCollection('users'), database.client));
-}
-
 const getUsers: RequestHandler = (req, res): void => {
-  initStubUsers(stubUsers);
   database.getAllDocuments(database.getCollection('users'))
     .toArray((err, docs) => res.send(docs));
 };
 
 const getUser: RequestHandler = (req, res): void => {
-  database.getDocumentById(req.params['id'], database.getCollection('users'))
-    .then((doc) => res.send(doc));
+  database.getDocumentById(req.params['id'], database.getCollection('users'), (error, result) => {
+    console.log('RESULT', result);
+    res.send(result);
+  })
 };
 
 const addUser: RequestHandler = (req, res): void => {
-  database.insertDocument(req.body, database.getCollection('users'), database.client)
+  console.log('Request', req.body);
+  database.insertDocument(req.body, database.getCollection('users'), database.client);
+  res.send(req.body);
 };
 
 const updateUser: RequestHandler = (req, res): void => {
-  database.updateDocument(req.body, database.getCollection('users'), database.client);
+  database.updateDocument(req.params['id'], req.body, database.getCollection('users'), database.client);
+  res.send(req.body);
 };
 
 const removeUser: RequestHandler = (req, res): void => {
-  database.deleteDocument(req.params['id'], database.getCollection('users'), database.client)
+  database.deleteDocument(req.params['id'], database.getCollection('users'), database.client);
+  res.send(req.body);
 };
 
 

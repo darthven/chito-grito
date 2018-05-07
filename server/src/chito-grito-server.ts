@@ -20,5 +20,17 @@ export class ChitoGritoServer extends ExpressBasedServer {
             this.expressInstance.use(cors());
             super.listen();
         }, this.collectionNames);
+        process.on('SIGINT', () => {
+            this.stop();
+        });
+        process.on('SIGTERM', () => {
+            this.stop();
+        });
+    }
+
+    protected stop(): void {
+        this.database.close().then(() => {
+            super.stop(() => console.log('Server was stopped'));
+        })
     }
 }

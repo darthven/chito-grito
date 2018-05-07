@@ -34,6 +34,7 @@ export class ExpressBasedServer {
         this.restMapping = new Map<HttpRequest, e.RequestHandler>();
         this.expressInstance = e();
         this.expressInstance.set('port', this.port);
+        this.expressInstance.use(bodyParser.json())
         this.expressInstance.use(e.static(path.join(__dirname, this.staticDirectory)));
         this.expressInstance.use(this.router);
     }
@@ -43,10 +44,15 @@ export class ExpressBasedServer {
     }
 
     public listen(): void {
-        const server: http.Server = http.createServer(this.expressInstance);
+        this.serverInstance = http.createServer(this.expressInstance);
         this.restMapping.forEach((callback, request) => {
             this.expressInstance[request.method](request.url, callback)
         })
-        server.listen(this.port, () => console.log(`Running on http://${this.host}:${this.port}`));
+        this.serverInstance.listen(this.port, 
+            () => console.log(`Running on http://${this.host}:${this.port}`));
+    }
+
+    protected stop(callback: Function): void {
+        this.serverInstance && this.serverInstance.close(callback);
     }
 }

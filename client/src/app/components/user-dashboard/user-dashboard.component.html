@@ -1,3 +1,10 @@
-<p>
-  user-dashboard works!
-</p>
+<div class="user-dashboard-wrapper">
+  <div class="header" *ngIf="user$ | async as user">
+      <mat-toolbar>
+          <h2 class="name" #name ngDefaultControl [(ngModel)]="user.name">{{user.name}}</h2>
+          <h2 class="profile">Profile</h2>
+          <h2 class="list" [routerLink]="['/users']">List</h2>
+      </mat-toolbar>
+  </div> 
+  <router-outlet></router-outlet>
+</div>

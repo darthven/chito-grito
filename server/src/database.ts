@@ -1,9 +1,9 @@
 import { MongoClient, MongoError, Db,
-    InsertOneWriteOpResult, InsertWriteOpResult, Collection, Cursor } from 'mongodb';
+    InsertOneWriteOpResult, InsertWriteOpResult, Collection, Cursor, MongoCallback, ObjectId } from 'mongodb';
 import * as assert from 'assert';
    
 interface Model {
-    _id?: string;
+    _id: string;
 }
 
 export class MongoDatabase {   
@@ -21,26 +21,20 @@ export class MongoDatabase {
         this.collections = new Map<string, Collection>();
     }
 
-    private closeConnection(): Promise<void> {
-        return new Promise(() => Array.from(this.collections.keys()).forEach((name) => {
-            this.dbInstance.dropCollection(name)
-        })).then(() => this.client.close());  
-    }
-
     public connect(callback: Function, collectionNames: string[]): void {
         MongoClient.connect(this.connectionUrl, (err: MongoError, client: MongoClient) => {
             assert.equal(null, err);
             this.client = client;
             this.initDatabase(this.client, collectionNames);
             console.log('Connected successfully to database server'); 
-            process.on('SIGINT', () => {  
-                this.closeConnection();    
-            });      
-            process.on('SIGTERM', () => {  
-                this.closeConnection();    
-            });     
             callback();
         });
+    }
+
+    public close(): Promise<void> {
+        return this.cleanup()
+            .then(() => this.client.close())
+            .then(() => console.log('Connection to database was closed'))
     }
     
     public createCollection(collectionName: string, db: Db): void {
@@ -55,27 +49,37 @@ export class MongoDatabase {
         return collection.find({});
     }
 
-    public getDocumentById<T extends Model>(docId: string, collection: Collection<T>): Promise<T> {
-        return <Promise<T>> collection.findOne({_id: docId});
+    public getDocumentById<T extends Model>(docId: string,
+            collection: Collection<T>, callback: MongoCallback<T | null>): void {
+        collection.findOne({_id: new ObjectId(docId)}, callback);
     }
     
     public insertDocument<T extends Model>(entity: T, collection: Collection<T>,
             client: MongoClient): void {
         collection.insertOne(entity, (err, result) => {
-            console.log('Inserted: ', result);
+            console.log('Inserted: ', result.insertedId);
         })
     }
 
-    public updateDocument<T extends Model>(entity: T, collection: Collection<T>,
+    public updateDocument<T extends Model>(id: string, entity: T, collection: Collection<T>,
             client: MongoClient): void {
-        collection.findOneAndUpdate({_id: entity._id}, entity, (err, result) => {
-            console.log('Updated: ', result);
+        collection.findOneAndUpdate({_id: new ObjectId(id)}, { $set: entity }, { upsert: true }, (err, result) => {
+            console.log('Updated: ', result.ok);
         })
     }
 
-    public deleteDocument<T extends Model>(entity: T, collection: Collection<T>, client: MongoClient): void {
-        collection.deleteOne({_id: entity._id}, (err, result) => {
-            console.log('Removed: ', result);
+    public deleteDocument<T extends Model>(id: string, collection: Collection<T>,
+            client: MongoClient): void {
+        collection.findOneAndDelete({_id: new ObjectId(id)}, (err, result) => {
+            console.log('Removed: ', result.ok);
+        })
+    }
+
+    protected cleanup(): Promise<void> {
+        return this.dbInstance.collections().then((colls) => {
+            this.collections.forEach((col) => col.drop(() => {
+                console.log(`Collection "${col.collectionName}" was dropped`);
+            }));
         })
     }
 

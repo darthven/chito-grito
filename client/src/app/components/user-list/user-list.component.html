@@ -1,9 +1,17 @@
 <div class="user-list-wrapper">
   <h1>List of users</h1>
-  <mat-list>
-      <mat-list-item *ngFor="let user of users">
-        <button mat-button>{{user.name}}</button>
-      </mat-list-item>
-  </mat-list>
-  <input placeholder="Name">
+  <table class="user-list">
+    <tr *ngFor="let user of users$ | async">
+      <td>
+        <button class="user-item" mat-button (click)="goToProfile(user)">
+          <span>{{user.name}}</span>
+        </button>
+      </td>
+    </tr>
+  </table>
+  <form class="new-user-wrapper">
+    <input type="text" class="user-input" #name required pattern="/^[a-z ,.'-]+$/i" 
+      placeholder="Enter name of user">
+    <button class="user-btn" (click)="addUser(name.value)">Add</button>
+  </form>
 </div>

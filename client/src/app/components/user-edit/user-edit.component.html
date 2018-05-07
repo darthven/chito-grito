@@ -1,3 +1,26 @@
-<p>
-  user-edit works!
-</p>
+<div class="user-edit-wrapper">
+  <div class="user-form" *ngIf="user">
+      <form [formGroup]="userEditForm" (ngSubmit)="saveChanges()"> 
+          <div class="user-field">
+            <label for="name">Name</label>
+            <input #name class="user-name" required pattern="/^[a-z ,.'-]+$/i"
+              [(ngModel)]="user.name" value="{{ user.name }}" formControlName="name">
+          </div>
+          <div class="user-field">
+            <label for="age">Age</label>
+            <input type="number" #age class="user-age" min="1" max="150" [(ngModel)]="user.age" value="{{ user.age }}"
+              formControlName="age">
+          </div>
+          <div class="user-field">
+            <label for="info">About</label>    
+            <textarea #info class="user-info" maxlength="1000" [(ngModel)]="user.info" formControlName="info">
+              {{ user.info }}
+            </textarea>
+          </div>      
+          <div class="user-edit-buttons">
+            <button type="submit" class="action-button save-btn">Save changes</button>
+            <button class="action-button exit-btn" (click)="goToProfile()">Exit</button>
+          </div>
+      </form>
+  </div>
+</div>
