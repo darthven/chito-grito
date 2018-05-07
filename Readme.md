@@ -1,7 +1,8 @@
 
-<h1> Task </h1>>
+<h1> Task </h1>
 
 <h2>Undone</h2>
+
     1. Routing by url in browser without 
     refreshing page (no existing stable and compatitable routing libraries for Angular API caused by Angular's structure based on zone.js and rxjs)
 
@@ -10,7 +11,8 @@
     3. Input validation was just fucked.
 
 <h2>Instructions</h2>
-    ---
+
+
     Directory 'server': node main
     Directory 'client': npm start
     Open http://localhost:4200
